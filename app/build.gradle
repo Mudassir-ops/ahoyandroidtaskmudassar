@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-
 }
 apply plugin: 'kotlin-android'
 
@@ -80,16 +79,15 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
 
 
-
     implementation 'pub.devrel:easypermissions:3.0.0'
-
 
 
     //Room-Database
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     androidTestImplementation "androidx.room:room-testing:$room_version"
-//MultiDexSupport
+
+    //--MultiDexSupport
     implementation 'com.android.support:multidex:2.1.0'
 
 

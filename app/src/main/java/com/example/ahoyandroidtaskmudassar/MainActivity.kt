@@ -17,16 +17,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.ahoyandroidtaskmudassar.model.datasource.local.database.AppDatabase
 import com.example.ahoyandroidtaskmudassar.adapter.WeeklyWeatherForcastAdapter
 import com.example.ahoyandroidtaskmudassar.databinding.ActivityMainBinding
 import com.example.ahoyandroidtaskmudassar.model.Daily
 import com.example.ahoyandroidtaskmudassar.model.Hourly
-import com.example.ahoyandroidtaskmudassar.model.Weather
+import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
+import com.example.ahoyandroidtaskmudassar.model.datasource.local.dao.FavouriteDao
 import com.example.ahoyandroidtaskmudassar.viewmodel.WeatherViewModel
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.gson.annotations.SerializedName
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -34,12 +35,16 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Locale
 import kotlin.collections.ArrayList
+import kotlin.math.log
 
 
 @AndroidEntryPoint
@@ -49,6 +54,10 @@ class MainActivity : AppCompatActivity(){
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var mSettingsClient: SettingsClient? = null
 
+
+    var favouriteDao: FavouriteDao =
+        AppDatabase.getDatabase(MyApplication.getInstance().applicationContext)
+            .favouriteDao()
 
     val hourlyWeaterData=ArrayList<Hourly>()
     val weekllyWeaterData=ArrayList<Daily>()
@@ -67,10 +76,16 @@ class MainActivity : AppCompatActivity(){
 
         binding.fvBtn.setOnClickListener {
             //-----insert into db adn disaly in bottom reclerview
+            CoroutineScope(IO).launch {
+                favouriteDao.insertFavouriteCity(FavouritesTable(name=binding.tvCityName.text.toString(),temp=binding.tvCityTemp.text.toString(),feels_like=binding.tvCityFeelBy.text.toString(), description =binding.tvCityDecription.text.toString()))
+            }
         }
-        val weeklyWeatherForcastAdapter = WeeklyWeatherForcastAdapter {
 
+
+        val weeklyWeatherForcastAdapter = WeeklyWeatherForcastAdapter {
+            Log.d(TAG, "onCreate: $it")
         }
+
         binding.rvWeekly.apply {
             adapter = weeklyWeatherForcastAdapter
             layoutManager = LinearLayoutManager(this@MainActivity).apply {
@@ -137,10 +152,7 @@ class MainActivity : AppCompatActivity(){
             }
         })
 
-
-
     }
-
 
     private fun init() {
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
