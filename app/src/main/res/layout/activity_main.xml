@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background"
+    android:scrollbars="vertical"
+    android:fillViewport="true"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/top_layout"
+            android:background="@drawable/round_corner_shape"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_margin="10dp"
+            android:padding="5dp"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/et_search_by_city"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toStartOf="@+id/btn_search"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginStart="10dp"
+                android:hint="search by city"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_search"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+               android:layout_marginEnd="5dp"
+                android:background="@drawable/background"
+                android:text="search"
+                android:textColor="@color/white"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="@+id/et_search_by_city"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/et_search_by_city"
+                app:layout_constraintTop_toTopOf="@+id/et_search_by_city" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/clear_sky"
+                app:layout_constraintBottom_toTopOf="@+id/tvCityTemp"
+                app:layout_constraintStart_toEndOf="@+id/tvCity_decription" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/fv_btn"
+                android:background="@null"
+                android:src="@drawable/ic_baseline_favorite_border_24"
+                android:layout_width="30dp"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="10dp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintTop_toTopOf="@+id/tvCityName"
+                app:layout_constraintEnd_toStartOf="@+id/tvCityName"
+                app:layout_constraintBottom_toBottomOf="@+id/tvCityName"
+                android:layout_height="30dp"/>
+
+            <TextView
+                android:id="@+id/tvCityName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+              android:layout_marginStart="80dp"
+                android:text="Luanda"
+                android:textAlignment="viewStart"
+                app:layout_constraintStart_toEndOf="@+id/fv_btn"
+                app:layout_constrainedWidth="true"
+                android:textColor="@color/white"
+                android:textSize="30sp"
+                app:layout_constraintEnd_toEndOf="parent"
+
+
+                app:layout_constraintTop_toBottomOf="@+id/et_search_by_city" />
+
+
+            <TextView
+                android:id="@+id/tvCityTemp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvCity_feel_by"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="50&#xb0;C"
+                android:textColor="@color/white"
+                android:textSize="50sp" />
+
+            <TextView
+                android:id="@+id/tvCity_feel_by"
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:text="Feels like 50&#xb0;C"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fv_btn" />
+
+            <TextView
+                android:id="@+id/tvCity_decription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:gravity="center"
+                android:layout_marginTop="10dp"
+                android:text="clear sky"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fv_btn" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tvHourly"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="Todays Weather Forcast"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_layout" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_weekly"
+            app:layout_constraintTop_toBottomOf="@+id/tvHourly"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            tools:listitem="@layout/forcast_layout"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_height="wrap_content"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.core.widget.NestedScrollView>
