@@ -3,6 +3,7 @@ package com.example.ahoyandroidtaskmudassar
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -11,7 +12,6 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
@@ -23,14 +23,13 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ahoyandroidtaskmudassar.adapter.FavoruiteCityForcastAdapter
-import com.example.ahoyandroidtaskmudassar.model.datasource.local.database.AppDatabase
 import com.example.ahoyandroidtaskmudassar.adapter.WeeklyWeatherForcastAdapter
 import com.example.ahoyandroidtaskmudassar.databinding.ActivityMainBinding
 import com.example.ahoyandroidtaskmudassar.model.Daily
 import com.example.ahoyandroidtaskmudassar.model.Hourly
 import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
-import com.example.ahoyandroidtaskmudassar.model.datasource.local.dao.FavouriteDao
 import com.example.ahoyandroidtaskmudassar.utils.AlarmReceiver
+import com.example.ahoyandroidtaskmudassar.utils.SharedPreferencesUtil
 import com.example.ahoyandroidtaskmudassar.viewmodel.WeatherViewModel
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -42,16 +41,17 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Locale
 import kotlin.collections.ArrayList
-import kotlin.math.log
+import android.R.string.no
+
+
+
+
 
 
 @AndroidEntryPoint
@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var alarmManager: AlarmManager
     private lateinit var pendingIntent: PendingIntent
+    private lateinit var mEverydayPendingIntent: PendingIntent
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
@@ -81,12 +82,6 @@ class MainActivity : AppCompatActivity() {
         restoreValuesFromBundle(savedInstanceState)
 
 
-        startAlarm(
-            "1643158225000",
-            12,
-
-
-        )
 
         val weeklyWeatherForcastAdapter =
             WeeklyWeatherForcastAdapter { Log.d(TAG, "onCreate: $it") }
@@ -131,7 +126,8 @@ class MainActivity : AppCompatActivity() {
             Log.d("SSsaS", "onCreate: ${it.timezone}")
             //---x numbers weather forcast
             // viewModel.getWeatherByOneCall()
-
+            SharedPreferencesUtil(this as Activity).saveCity(it.name)
+            SharedPreferencesUtil(this as Activity).saveTemp("${it.main.temp.toString()}℉  ${it.main.feels_like.toString()}℉")
             binding.apply {
 
                 tvCityName.text = it.name
@@ -140,6 +136,7 @@ class MainActivity : AppCompatActivity() {
                 tvCityDecription.text = "${it.weather2[0].description}"
 
             }
+            setAlarm()
         })
 
         viewModel.weatherResponseByOneCall.observe(this, Observer {
@@ -412,55 +409,6 @@ class MainActivity : AppCompatActivity() {
         return dayNames[day]
     }
 
-
-    private fun startAlarm(time: String, eventId: Int) {
-        var date = Date()
-        try {
-            val formatter = SimpleDateFormat("dd MMMM yyyy HH:mm:ss")
-            date = formatter.parse(time)
-            Log.d(TAGNUMBER, "startAlarmDate: $date")
-        } catch (e: Exception) {
-        }
-        val c = Calendar.getInstance()
-        // c.clear()
-        c.time = date
-        Log.d(TAGNUMBER, "startAlarm: ${c.getTimeInMillis()}")
-        var reminderDateTimeInMilliseconds: Long = 0
-        reminderDateTimeInMilliseconds = c.getTimeInMillis()
-        alarmManager =
-            this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val intent = Intent(this, AlarmReceiver::class.java)
-        intent.putExtra("EVENTID", eventId)
-        intent.putExtra("PLAYERNAME", "Naju")
-        pendingIntent =
-                //--FLAG_UPDATE_CURRENT
-            PendingIntent.getBroadcast(this, eventId, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT
-            )
-        alarmManager.cancel(pendingIntent)
-
-        // alarmManager.cancel(pendingIntent)
-        if (reminderDateTimeInMilliseconds > System.currentTimeMillis()) {
-            val intent = Intent(this, AlarmReceiver::class.java)
-            intent.putExtra("EVENTID", eventId)
-            intent.putExtra("PLAYERNAME", "NAJu")
-            pendingIntent =
-                    //--FLAG_UPDATE_CURRENT
-                PendingIntent.getBroadcast(this, eventId, intent,
-                    PendingIntent.FLAG_CANCEL_CURRENT
-                )
-            alarmManager.setAlarmClock(
-                AlarmManager.AlarmClockInfo(
-                    reminderDateTimeInMilliseconds,
-                    pendingIntent
-                ), pendingIntent
-            )
-            return
-        }
-
-    }
-
     companion object {
         private var mLastUpdateTime: String? = null
         private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 100
@@ -475,4 +423,38 @@ class MainActivity : AppCompatActivity() {
         val TAG: String = "MainActivityTAG"
     }
 
+    private fun setAlarm(){
+
+        val timeNow: Calendar? = Calendar.getInstance()
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis();
+        calendar[Calendar.HOUR_OF_DAY] = 13
+        calendar[Calendar.MINUTE] = 5
+        calendar[Calendar.SECOND] = 0
+
+        if(calendar.before(timeNow)){
+            Log.d(TAG, "added 1 day as time past ")
+            calendar.add(Calendar.DATE, 1);
+        }else{
+            if (calendar.time > Date())calendar.add(Calendar.HOUR_OF_DAY, 0)
+            val intent = Intent(applicationContext, AlarmReceiver::class.java)
+            intent.putExtra("CITYNAME", SharedPreferencesUtil(this as Activity).getCity())
+            intent.putExtra("EVENTID", "0")
+            intent.putExtra("TEMP",  SharedPreferencesUtil(this as Activity).getTemp())
+            val pendingIntent = PendingIntent.getBroadcast(
+                applicationContext,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+            alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                AlarmManager.INTERVAL_DAY,
+                pendingIntent
+            )
+        }
+
+    }
 }
