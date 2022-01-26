@@ -12,6 +12,7 @@ import android.os.Handler
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Observer
 import com.example.ahoyandroidtaskmudassar.R
 import com.example.ahoyandroidtaskmudassar.databinding.ActivityMainBinding
@@ -31,34 +32,18 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel.isInternetAlive.observe(this, Observer {
-            if(it){
-                Handler().postDelayed({
-                    startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                }, 1000)
-            }else{
-                binding.apply {
-                    tvFetching.text="Checking Your Network Connection..."
-                }
-            }
+        viewModel.setTimeOut(1000)
+        viewModel.timeOutDealy.observe(this, Observer {
+            Handler().postDelayed({
+                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+            }, it)
         })
 
+
+
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun isOnline(): Boolean {
 
-        val connectivityMgr = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val allNetworks: Array<Network> = connectivityMgr.allNetworks // added in API 21 (Lollipop)
 
-        for (network in allNetworks) {
-            val networkCapabilities = connectivityMgr.getNetworkCapabilities(network)
-            return (networkCapabilities!!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) &&
-                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)))
-        }
-        return false
-    }
+
 }

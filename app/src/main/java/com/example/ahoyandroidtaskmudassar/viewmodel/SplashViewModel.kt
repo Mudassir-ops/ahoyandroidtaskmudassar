@@ -31,7 +31,7 @@ constructor() : ViewModel() {
        isInternetAlive.value= isOnline(MyApplication.getInstance())
     }
 
-     fun getTimeOut(splashTimeOut: Long) = viewModelScope.launch {
+     fun setTimeOut(splashTimeOut: Long) = viewModelScope.launch {
         timeOut.value=splashTimeOut
     }
 

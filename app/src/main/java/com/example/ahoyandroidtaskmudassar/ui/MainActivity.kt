@@ -10,7 +10,11 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +22,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
@@ -58,12 +63,9 @@ class MainActivity : AppCompatActivity() {
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var mSettingsClient: SettingsClient? = null
     private var backPressedOnce = false
-    val hourlyWeaterData = ArrayList<Hourly>()
     val weekllyWeaterData = ArrayList<DailyWeatherTable>()
 
-    private lateinit var alarmManager: AlarmManager
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var mEverydayPendingIntent: PendingIntent
+
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
@@ -74,9 +76,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        init()
-        restoreValuesFromBundle(savedInstanceState)
+         if(isOnline()){
+             init()
+             restoreValuesFromBundle(savedInstanceState)
+         }
 
 
         val weeklyWeatherForcastAdapter =
@@ -91,18 +94,27 @@ class MainActivity : AppCompatActivity() {
             }
 
         binding.fvBtn.setOnClickListener {
-            binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
-            Toast.makeText(this, "Added to Fav Cities", Toast.LENGTH_SHORT).show()
-            viewModel.insert(
-                FavouritesTable(
-                    name = binding.tvCityName.text.toString(),
-                    temp = binding.tvCityTemp.text.toString(),
-                    feels_like = binding.tvCityFeelBy.text.toString(),
-                    description = binding.tvCityDecription.text.toString()
+            if(isOnline()){
+                binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
+                Toast.makeText(this, "Added to Fav Cities", Toast.LENGTH_SHORT).show()
+                viewModel.insert(
+                    FavouritesTable(
+                        name = binding.tvCityName.text.toString(),
+                        temp = binding.tvCityTemp.text.toString(),
+                        feels_like = binding.tvCityFeelBy.text.toString(),
+                        description = binding.tvCityDecription.text.toString()
+                    )
                 )
-            )
+            }else{
+                Toast.makeText(this, "Search Only Works When Internet Alive", Toast.LENGTH_SHORT).show()
+            }
+
         }
 
+        binding.setting.setOnClickListener {
+            startActivity(Intent(this,SettinActivity::class.java))
+
+        }
         viewModel.getFavouritesCityWeather.observe(this, Observer {
 
 
@@ -127,18 +139,18 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        viewModel.weatherResponse2.observe(this, Observer {
-            Log.d("SSsaS", "onCreate: ${it.timezone}")
+        viewModel.getMainTable.observe(this, Observer {
+
             //---x numbers weather forcast
             // viewModel.getWeatherByOneCall()
-            SharedPreferencesUtil(this as Activity).saveCity(it.name)
-            SharedPreferencesUtil(this as Activity).saveTemp("${it.mainTable.temp.toString()}℉  ${it.mainTable.feels_like.toString()}℉")
+            SharedPreferencesUtil(this as Activity).saveCity(it[0].name)
+            SharedPreferencesUtil(this as Activity).saveTemp("${it[0].temp}℉  ${it[0].feels_like}℉")
             binding.apply {
 
-                tvCityName.text = it.name
-                tvCityTemp.text = "${it.mainTable.temp} ℉"
-                tvCityFeelBy.text = "feels like${it.mainTable.feels_like} ℉"
-                tvCityDecription.text = "${it.weather2[0].description}"
+                tvCityName.text = it[0].name
+                tvCityTemp.text = "${it[0].temp} ℉"
+                tvCityFeelBy.text = "feels like${it[0].feels_like} ℉"
+                tvCityDecription.text = "${it[0].description}"
 
             }
             setAlarm()
@@ -358,15 +370,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!ifSearchCLicked) {
-            if (mRequestingLocationUpdates!! && checkPermissions()) {
-                startLocationUpdates()
-            } else {
-                startLocationButtonClick()
+        if(isOnline()){
+            if (!ifSearchCLicked) {
+                if (mRequestingLocationUpdates!! && checkPermissions()) {
+                    startLocationUpdates()
+                } else {
+                    startLocationButtonClick()
+                    updateLocationUI()
+                }
                 updateLocationUI()
             }
-            updateLocationUI()
         }
+
 
     }
 
@@ -418,7 +433,6 @@ class MainActivity : AppCompatActivity() {
         private var mLocationCallback: LocationCallback? = null
         private var mCurrentLocation: Location? = null
         private var mRequestingLocationUpdates: Boolean? = null
-        val TAGNUMBER = "TAGNUMBERHERE"
         val TAG: String = "MainActivityTAG"
     }
 
@@ -474,5 +488,21 @@ class MainActivity : AppCompatActivity() {
             }, 2000)
 
 
+    }
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun isOnline(): Boolean {
+
+        val connectivityMgr = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val allNetworks: Array<Network> = connectivityMgr.allNetworks // added in API 21 (Lollipop)
+
+        for (network in allNetworks) {
+            val networkCapabilities = connectivityMgr.getNetworkCapabilities(network)
+            return (networkCapabilities!!.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) &&
+                    (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                            || networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)))
+        }
+        return false
     }
 }
