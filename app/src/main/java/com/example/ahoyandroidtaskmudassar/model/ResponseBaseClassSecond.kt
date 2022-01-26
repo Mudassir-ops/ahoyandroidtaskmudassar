@@ -4,7 +4,7 @@ package com.example.ahoyandroidtaskmudassar.model
 import com.google.gson.annotations.SerializedName
 
 
-data class Json4Kotlin_Base2 (
+data class ResponseBaseClassSecond (
 
 	@SerializedName("lat") val lat : Double,
 	@SerializedName("lon") val lon : Double,

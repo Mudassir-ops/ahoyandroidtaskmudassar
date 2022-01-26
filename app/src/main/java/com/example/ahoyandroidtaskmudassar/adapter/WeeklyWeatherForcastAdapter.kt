@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.ahoyandroidtaskmudassar.MainActivity
+import com.example.ahoyandroidtaskmudassar.ui.MainActivity
 import com.example.ahoyandroidtaskmudassar.databinding.ForcastLayoutBinding
 import com.example.ahoyandroidtaskmudassar.model.Daily
 import java.text.DateFormatSymbols

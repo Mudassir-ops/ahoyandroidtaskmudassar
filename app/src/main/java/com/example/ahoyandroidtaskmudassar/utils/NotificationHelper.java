@@ -59,9 +59,9 @@ public class NotificationHelper extends ContextWrapper {
         try {
             Uri notification = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.old_telephone);
             v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            //ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
             v.vibrate(VibrationEffect.createWaveform(pattern, 3));
-            ringtone.play();
+          //  ringtone.play();
             //   v.vibrate(VibrationEffect.createOneShot(3000, VibrationEffect.DEFAULT_AMPLITUDE));
 
         } catch (Exception e) {

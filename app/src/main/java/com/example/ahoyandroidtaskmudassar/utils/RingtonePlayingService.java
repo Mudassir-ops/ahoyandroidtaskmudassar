@@ -28,11 +28,11 @@ public class RingtonePlayingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommandHere" + intent);
-        NotificationHelper.ringtone.stop();
-        if (NotificationHelper.ringtone.isPlaying()) {
-            Toast.makeText(this, "music is playing", Toast.LENGTH_LONG).show();
-            NotificationHelper.ringtone.stop();
-        }
+      //  NotificationHelper.ringtone.stop();
+//        if (NotificationHelper.ringtone.isPlaying()) {
+//            Toast.makeText(this, "music is playing", Toast.LENGTH_LONG).show();
+//            NotificationHelper.ringtone.stop();
+//        }
         if (intent == null) {
             Log.d(TAG, "The intent is null.");
             return START_REDELIVER_INTENT;
@@ -69,7 +69,7 @@ public class RingtonePlayingService extends Service {
         Intent intent = new Intent(getBaseContext(), AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, AlarmId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         aManager.cancel(pendingIntent);
-        NotificationHelper.ringtone.stop();
+       // NotificationHelper.ringtone.stop();
         NotificationHelper.v.cancel();
 
         // Canceling the current notification

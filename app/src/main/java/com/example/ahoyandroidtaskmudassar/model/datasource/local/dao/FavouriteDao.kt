@@ -16,6 +16,9 @@ interface FavouriteDao {
     @Query("Select * from favourite_table")
     fun getAllFavouriteCity(): Flow<List<FavouritesTable>>
 
+
+    @Query("Select * from favourite_table")
+    fun getAllFavouriteCityForTesting(): List<FavouritesTable>
 //    @Query("Select * from favourite_table  where isActive=:isActive")
 //    fun getAllIsActiveCinics(isActive: Boolean): LiveData<List<FavouritesTable>>
 

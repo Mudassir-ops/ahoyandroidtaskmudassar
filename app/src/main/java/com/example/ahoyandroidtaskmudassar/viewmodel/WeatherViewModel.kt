@@ -4,8 +4,8 @@ package com.example.ahoyandroidtaskmudassar.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
-import com.example.ahoyandroidtaskmudassar.model.Json4Kotlin_Base
-import com.example.ahoyandroidtaskmudassar.model.Json4Kotlin_Base2
+import com.example.ahoyandroidtaskmudassar.model.BaseResponseClassOne
+import com.example.ahoyandroidtaskmudassar.model.ResponseBaseClassSecond
 import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
 import com.example.ahoyandroidtaskmudassar.repository.DatabaseRepository
 import com.example.ahoyandroidtaskmudassar.repository.WeatherRepository
@@ -24,15 +24,15 @@ constructor(private val repository: WeatherRepository,private val databaseReposi
     val lngData=MutableLiveData<String>()
     val cityName=MutableLiveData<String>()
 
-    private val _response2 = MutableLiveData<Json4Kotlin_Base>()
-    val weatherResponse2: LiveData<Json4Kotlin_Base> get() = _response2
+    private val _response2 = MutableLiveData<BaseResponseClassOne>()
+    val weatherResponse2: LiveData<BaseResponseClassOne> get() = _response2
 
 
-    private val _responseCityName = MutableLiveData<Json4Kotlin_Base>()
-    val weatherResponseByCityName: LiveData<Json4Kotlin_Base> get() = _responseCityName
+    private val _responseCityName = MutableLiveData<BaseResponseClassOne>()
+    val weatherResponseByCityName: LiveData<BaseResponseClassOne> get() = _responseCityName
 
-    private val _responseByOneCall = MutableLiveData<Json4Kotlin_Base2>()
-    val weatherResponseByOneCall: LiveData<Json4Kotlin_Base2> get() = _responseByOneCall
+    private val _responseByOneCall = MutableLiveData<ResponseBaseClassSecond>()
+    val weatherResponseByOneCall: LiveData<ResponseBaseClassSecond> get() = _responseByOneCall
 
 //    init {
 //        getWeather2()

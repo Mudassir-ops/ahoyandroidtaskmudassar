@@ -1,4 +1,4 @@
-package com.example.ahoyandroidtaskmudassar
+package com.example.ahoyandroidtaskmudassar.ui
 
 
 import android.Manifest
@@ -6,13 +6,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
@@ -47,11 +47,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.Locale
 import kotlin.collections.ArrayList
-import android.R.string.no
-
-
-
-
+import com.example.ahoyandroidtaskmudassar.BuildConfig
+import com.example.ahoyandroidtaskmudassar.R
 
 
 @AndroidEntryPoint
@@ -60,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     var ifSearchCLicked = false
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var mSettingsClient: SettingsClient? = null
-
+    private var backPressedOnce = false
     val hourlyWeaterData = ArrayList<Hourly>()
     val weekllyWeaterData = ArrayList<Daily>()
 
@@ -77,10 +74,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //----location lat lng of device
+
         init()
         restoreValuesFromBundle(savedInstanceState)
-
 
 
         val weeklyWeatherForcastAdapter =
@@ -90,6 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.fvBtn.setOnClickListener {
             binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
+            Toast.makeText(this, "Added to Fav Cities", Toast.LENGTH_SHORT).show()
             viewModel.insert(
                 FavouritesTable(
                     name = binding.tvCityName.text.toString(),
@@ -140,20 +137,14 @@ class MainActivity : AppCompatActivity() {
         })
 
         viewModel.weatherResponseByOneCall.observe(this, Observer {
-//            this.hourlyWeaterData.clear()
-//            this.hourlyWeaterData.addAll(it.hourly)
-//
-//            this.weekllyWeaterData.clear()
-//            this.weekllyWeaterData.addAll(it.daily)
+            weekllyWeaterData.clear()
+            weekllyWeaterData.addAll(it.daily)
+            weekllyWeaterData.removeAt(0)
 
             weeklyWeatherForcastAdapter.submitList(null)
-            weeklyWeatherForcastAdapter.submitList(it.daily)
+            weeklyWeatherForcastAdapter.submitList(weekllyWeaterData)
             weeklyWeatherForcastAdapter.notifyDataSetChanged()
 
-//            for (h in it.hourly){
-//                this.hourlyWeaterData.add(Hourly(h.dt,h.temp,h.feels_like,h.pressure,h.humidity,h.dew_point,h.uvi,h.clouds,h.visibility,h.wind_speed,h.wind_deg,h.wind_gust,h.weather,h.pop))
-//
-//            }
 
 
         })
@@ -173,7 +164,7 @@ class MainActivity : AppCompatActivity() {
                 tvCityName.text = it.name
                 tvCityTemp.text = "${it.main.temp} ℉"
                 tvCityFeelBy.text = "feels like${it.main.feels_like} ℉"
-                tvCityDecription.text = "${it.weather2[0].description}"
+                tvCityDecription.text = it.weather2[0].description
                 viewModel.lngData.value = it.coord.lon.toString()
                 viewModel.latData.value = it.coord.lat.toString()
                 viewModel.getWeatherByOneCall()
@@ -227,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         if (mCurrentLocation != null) {
             viewModel.latData.value = mCurrentLocation!!.latitude.toString()
             viewModel.lngData.value = mCurrentLocation!!.longitude.toString()
-            //  binding.tvWind.text= "Last updated on: $mLastUpdateTime"
+            binding.lastUpdated.text="Last updated on: $mLastUpdateTime"
             viewModel.getWeather2()
             viewModel.getWeatherByOneCall()
         }
@@ -247,8 +238,6 @@ class MainActivity : AppCompatActivity() {
             ?.checkLocationSettings(mLocationSettingsRequest)
             ?.addOnSuccessListener(this) {
                 Log.i(TAG, "All location settings are satisfied.")
-                Toast.makeText(applicationContext, "Started location updates!", Toast.LENGTH_SHORT)
-                    .show()
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -428,8 +417,9 @@ class MainActivity : AppCompatActivity() {
         val timeNow: Calendar? = Calendar.getInstance()
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis();
+        ///---at morning 6 notification
         calendar[Calendar.HOUR_OF_DAY] = 13
-        calendar[Calendar.MINUTE] = 5
+        calendar[Calendar.MINUTE] = 12
         calendar[Calendar.SECOND] = 0
 
         if(calendar.before(timeNow)){
@@ -455,6 +445,24 @@ class MainActivity : AppCompatActivity() {
                 pendingIntent
             )
         }
+
+    }
+
+    override fun onBackPressed() {
+
+
+            if (backPressedOnce) {
+                super.onBackPressed()
+                this.finishAffinity()
+            }
+            backPressedOnce = true
+            Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show()
+
+            Handler().postDelayed({
+                backPressedOnce = false
+                finish()
+            }, 2000)
+
 
     }
 }

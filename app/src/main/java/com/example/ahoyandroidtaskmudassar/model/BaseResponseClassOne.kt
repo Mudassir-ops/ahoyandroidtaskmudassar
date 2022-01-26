@@ -1,7 +1,7 @@
 package com.example.ahoyandroidtaskmudassar.model
 import com.google.gson.annotations.SerializedName
 
-data class Json4Kotlin_Base (
+data class BaseResponseClassOne (
 
 	@SerializedName("coord") val coord : Coord,
 	@SerializedName("weather") val weather2 : List<Weather2>,
