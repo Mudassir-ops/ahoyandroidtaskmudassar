@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         binding.fvBtn.setOnClickListener {
-            if(isOnline()){
+
                 binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
                 Toast.makeText(this, "Added to Fav Cities", Toast.LENGTH_SHORT).show()
                 viewModel.insert(
@@ -105,14 +105,12 @@ class MainActivity : AppCompatActivity() {
                         description = binding.tvCityDecription.text.toString()
                     )
                 )
-            }else{
-                Toast.makeText(this, "Search Only Works When Internet Alive", Toast.LENGTH_SHORT).show()
-            }
+
 
         }
 
         binding.setting.setOnClickListener {
-            startActivity(Intent(this,SettinActivity::class.java))
+           // startActivity(Intent(this,SettinActivity::class.java))
 
         }
         viewModel.getFavouritesCityWeather.observe(this, Observer {
@@ -173,9 +171,14 @@ class MainActivity : AppCompatActivity() {
 
 
         binding.btnSearch.setOnClickListener {
-            ifSearchCLicked = true
-            viewModel.cityName.value = binding.etSearchByCity.text.toString().trim()
-            viewModel.getWeatherByCityName()
+            if(isOnline()){
+                ifSearchCLicked = true
+                viewModel.cityName.value = binding.etSearchByCity.text.toString().trim()
+                viewModel.getWeatherByCityName()
+            }else{
+                Toast.makeText(this, "Only Search Work when Internet ALive", Toast.LENGTH_SHORT).show()
+            }
+
 
         }
         viewModel.weatherResponseByCityName.observe(this, Observer {
