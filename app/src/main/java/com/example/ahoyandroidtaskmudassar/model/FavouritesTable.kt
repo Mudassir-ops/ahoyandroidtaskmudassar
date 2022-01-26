@@ -1,10 +1,9 @@
-package com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic
+package com.example.ahoyandroidtaskmudassar.model
 
 import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import org.jetbrains.annotations.NotNull
 
 @Entity(tableName = "favourite_table")
 data class FavouritesTable(

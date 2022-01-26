@@ -25,9 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ahoyandroidtaskmudassar.adapter.FavoruiteCityForcastAdapter
 import com.example.ahoyandroidtaskmudassar.adapter.WeeklyWeatherForcastAdapter
 import com.example.ahoyandroidtaskmudassar.databinding.ActivityMainBinding
-import com.example.ahoyandroidtaskmudassar.model.Daily
 import com.example.ahoyandroidtaskmudassar.model.Hourly
-import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
+import com.example.ahoyandroidtaskmudassar.model.FavouritesTable
 import com.example.ahoyandroidtaskmudassar.utils.AlarmReceiver
 import com.example.ahoyandroidtaskmudassar.utils.SharedPreferencesUtil
 import com.example.ahoyandroidtaskmudassar.viewmodel.WeatherViewModel
@@ -49,6 +48,7 @@ import java.util.Locale
 import kotlin.collections.ArrayList
 import com.example.ahoyandroidtaskmudassar.BuildConfig
 import com.example.ahoyandroidtaskmudassar.R
+import com.example.ahoyandroidtaskmudassar.model.DailyWeatherTable
 
 
 @AndroidEntryPoint
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     private var mSettingsClient: SettingsClient? = null
     private var backPressedOnce = false
     val hourlyWeaterData = ArrayList<Hourly>()
-    val weekllyWeaterData = ArrayList<Daily>()
+    val weekllyWeaterData = ArrayList<DailyWeatherTable>()
 
     private lateinit var alarmManager: AlarmManager
     private lateinit var pendingIntent: PendingIntent
@@ -82,7 +82,13 @@ class MainActivity : AppCompatActivity() {
         val weeklyWeatherForcastAdapter =
             WeeklyWeatherForcastAdapter { Log.d(TAG, "onCreate: $it") }
         val favoruiteCityForcastAdapter =
-            FavoruiteCityForcastAdapter { Log.d(TAG, "onCreate: $it") }
+            FavoruiteCityForcastAdapter {
+                Log.d(TAG, "onCreate: $it")
+                val intent =Intent(this,WeatherDetailActivity::class.java)
+                intent.putExtra("SelectedName",it)
+                startActivity(intent)
+
+            }
 
         binding.fvBtn.setOnClickListener {
             binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
@@ -98,6 +104,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.getFavouritesCityWeather.observe(this, Observer {
+
+
             favoruiteCityForcastAdapter.submitList(null)
             favoruiteCityForcastAdapter.submitList(it as ArrayList<FavouritesTable>)
             favoruiteCityForcastAdapter.notifyDataSetChanged()
@@ -124,26 +132,28 @@ class MainActivity : AppCompatActivity() {
             //---x numbers weather forcast
             // viewModel.getWeatherByOneCall()
             SharedPreferencesUtil(this as Activity).saveCity(it.name)
-            SharedPreferencesUtil(this as Activity).saveTemp("${it.main.temp.toString()}℉  ${it.main.feels_like.toString()}℉")
+            SharedPreferencesUtil(this as Activity).saveTemp("${it.mainTable.temp.toString()}℉  ${it.mainTable.feels_like.toString()}℉")
             binding.apply {
 
                 tvCityName.text = it.name
-                tvCityTemp.text = "${it.main.temp} ℉"
-                tvCityFeelBy.text = "feels like${it.main.feels_like} ℉"
+                tvCityTemp.text = "${it.mainTable.temp} ℉"
+                tvCityFeelBy.text = "feels like${it.mainTable.feels_like} ℉"
                 tvCityDecription.text = "${it.weather2[0].description}"
 
             }
             setAlarm()
         })
 
-        viewModel.weatherResponseByOneCall.observe(this, Observer {
+        viewModel.getdailyWeather.observe(this, Observer {
             weekllyWeaterData.clear()
-            weekllyWeaterData.addAll(it.daily)
-            weekllyWeaterData.removeAt(0)
+            weekllyWeaterData.addAll(it)
+            if(weekllyWeaterData.size>0){
+                weekllyWeaterData.removeAt(0)
 
-            weeklyWeatherForcastAdapter.submitList(null)
-            weeklyWeatherForcastAdapter.submitList(weekllyWeaterData)
-            weeklyWeatherForcastAdapter.notifyDataSetChanged()
+                weeklyWeatherForcastAdapter.submitList(null)
+                weeklyWeatherForcastAdapter.submitList(weekllyWeaterData)
+                weeklyWeatherForcastAdapter.notifyDataSetChanged()
+            }
 
 
 
@@ -162,8 +172,8 @@ class MainActivity : AppCompatActivity() {
             binding.apply {
 
                 tvCityName.text = it.name
-                tvCityTemp.text = "${it.main.temp} ℉"
-                tvCityFeelBy.text = "feels like${it.main.feels_like} ℉"
+                tvCityTemp.text = "${it.mainTable.temp} ℉"
+                tvCityFeelBy.text = "feels like${it.mainTable.feels_like} ℉"
                 tvCityDecription.text = it.weather2[0].description
                 viewModel.lngData.value = it.coord.lon.toString()
                 viewModel.latData.value = it.coord.lat.toString()

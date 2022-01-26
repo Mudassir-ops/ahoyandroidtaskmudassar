@@ -19,8 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AhoyAndroidTaskMudassar">
         <activity
+            android:name=".ui.WeatherDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.SplashActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,9 +32,7 @@
         </activity>
         <activity
             android:name=".ui.MainActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false"></activity>
 
         <receiver
             android:name=".utils.AlarmReceiver"

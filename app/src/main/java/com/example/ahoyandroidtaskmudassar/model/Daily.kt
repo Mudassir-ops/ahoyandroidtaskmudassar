@@ -1,5 +1,9 @@
 package com.example.ahoyandroidtaskmudassar.model
+import androidx.annotation.NonNull
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+
 
 
 
@@ -19,7 +23,7 @@ data class Daily (
 	@SerializedName("wind_speed") val wind_speed : Double,
 	@SerializedName("wind_deg") val wind_deg : Int,
 	@SerializedName("wind_gust") val wind_gust : Double,
-	@SerializedName("weather") val weather : List<Weather>,
+//	@SerializedName("weather") val weather : List<Weather>,
 	@SerializedName("clouds") val clouds : Int,
 	@SerializedName("uvi") val uvi : Double
 )

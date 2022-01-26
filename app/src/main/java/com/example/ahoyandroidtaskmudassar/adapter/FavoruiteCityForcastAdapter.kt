@@ -8,15 +8,15 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ahoyandroidtaskmudassar.ui.MainActivity
 import com.example.ahoyandroidtaskmudassar.databinding.ForcastLayoutBinding
-import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
+import com.example.ahoyandroidtaskmudassar.model.FavouritesTable
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class FavoruiteCityForcastAdapter(private val callback: (Int) -> Unit) : ListAdapter<FavouritesTable, FavoruiteCityForcastAdapter.ViewHolder>(DiffCallbak()){
+class FavoruiteCityForcastAdapter(private val callback: (String) -> Unit) : ListAdapter<FavouritesTable, FavoruiteCityForcastAdapter.ViewHolder>(DiffCallbak()){
 
-    class ViewHolder(private val binding: ForcastLayoutBinding, val callback: (Int) -> Unit): RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(private val binding: ForcastLayoutBinding, val callback: (String) -> Unit): RecyclerView.ViewHolder(binding.root) {
 
         fun bind(favouritesTable: FavouritesTable){
             binding.apply {
@@ -24,6 +24,9 @@ class FavoruiteCityForcastAdapter(private val callback: (Int) -> Unit) : ListAda
                 tvTime.text=favouritesTable.name
                 tvTmep.text = favouritesTable.temp
                 tvWind.text = favouritesTable.description
+                outerLayout.setOnClickListener {
+                      callback.invoke(favouritesTable.name)
+                }
 
             }
         }

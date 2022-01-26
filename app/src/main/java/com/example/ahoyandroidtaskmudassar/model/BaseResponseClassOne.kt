@@ -6,7 +6,7 @@ data class BaseResponseClassOne (
 	@SerializedName("coord") val coord : Coord,
 	@SerializedName("weather") val weather2 : List<Weather2>,
 	@SerializedName("base") val base : String,
-	@SerializedName("main") val main : Main,
+	@SerializedName("main") val mainTable : MainTable,
 	@SerializedName("visibility") val visibility : Int,
 	@SerializedName("wind") val wind : Wind,
 	@SerializedName("clouds") val clouds : Clouds,
@@ -18,4 +18,4 @@ data class BaseResponseClassOne (
 	@SerializedName("cod") val cod : Int,
 
 
-)
+	)
