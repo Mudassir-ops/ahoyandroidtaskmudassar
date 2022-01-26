@@ -3,6 +3,9 @@ package com.example.ahoyandroidtaskmudassar
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -27,6 +30,7 @@ import com.example.ahoyandroidtaskmudassar.model.Daily
 import com.example.ahoyandroidtaskmudassar.model.Hourly
 import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
 import com.example.ahoyandroidtaskmudassar.model.datasource.local.dao.FavouriteDao
+import com.example.ahoyandroidtaskmudassar.utils.AlarmReceiver
 import com.example.ahoyandroidtaskmudassar.viewmodel.WeatherViewModel
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -60,6 +64,9 @@ class MainActivity : AppCompatActivity() {
     val hourlyWeaterData = ArrayList<Hourly>()
     val weekllyWeaterData = ArrayList<Daily>()
 
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var pendingIntent: PendingIntent
+
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
 
@@ -73,6 +80,13 @@ class MainActivity : AppCompatActivity() {
         init()
         restoreValuesFromBundle(savedInstanceState)
 
+
+        startAlarm(
+            "1643158225000",
+            12,
+
+
+        )
 
         val weeklyWeatherForcastAdapter =
             WeeklyWeatherForcastAdapter { Log.d(TAG, "onCreate: $it") }
@@ -368,18 +382,6 @@ class MainActivity : AppCompatActivity() {
         return permissionState == PackageManager.PERMISSION_GRANTED
     }
 
-    companion object {
-        private var mLastUpdateTime: String? = null
-        private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 100
-        private val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 50
-        private val REQUEST_CHECK_SETTINGS = 100
-        private var mLocationRequest: LocationRequest? = null
-        private var mLocationSettingsRequest: LocationSettingsRequest? = null
-        private var mLocationCallback: LocationCallback? = null
-        private var mCurrentLocation: Location? = null
-        private var mRequestingLocationUpdates: Boolean? = null
-        val TAG: String = "MainActivityTAG"
-    }
 
     fun getRIme(timestmap: Long) {
         val unixSeconds: Long = 1372339860
@@ -409,4 +411,68 @@ class MainActivity : AppCompatActivity() {
         val dayNames: Array<String> = symbols.weekdays
         return dayNames[day]
     }
+
+
+    private fun startAlarm(time: String, eventId: Int) {
+        var date = Date()
+        try {
+            val formatter = SimpleDateFormat("dd MMMM yyyy HH:mm:ss")
+            date = formatter.parse(time)
+            Log.d(TAGNUMBER, "startAlarmDate: $date")
+        } catch (e: Exception) {
+        }
+        val c = Calendar.getInstance()
+        // c.clear()
+        c.time = date
+        Log.d(TAGNUMBER, "startAlarm: ${c.getTimeInMillis()}")
+        var reminderDateTimeInMilliseconds: Long = 0
+        reminderDateTimeInMilliseconds = c.getTimeInMillis()
+        alarmManager =
+            this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(this, AlarmReceiver::class.java)
+        intent.putExtra("EVENTID", eventId)
+        intent.putExtra("PLAYERNAME", "Naju")
+        pendingIntent =
+                //--FLAG_UPDATE_CURRENT
+            PendingIntent.getBroadcast(this, eventId, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+        alarmManager.cancel(pendingIntent)
+
+        // alarmManager.cancel(pendingIntent)
+        if (reminderDateTimeInMilliseconds > System.currentTimeMillis()) {
+            val intent = Intent(this, AlarmReceiver::class.java)
+            intent.putExtra("EVENTID", eventId)
+            intent.putExtra("PLAYERNAME", "NAJu")
+            pendingIntent =
+                    //--FLAG_UPDATE_CURRENT
+                PendingIntent.getBroadcast(this, eventId, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT
+                )
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(
+                    reminderDateTimeInMilliseconds,
+                    pendingIntent
+                ), pendingIntent
+            )
+            return
+        }
+
+    }
+
+    companion object {
+        private var mLastUpdateTime: String? = null
+        private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 100
+        private val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 50
+        private val REQUEST_CHECK_SETTINGS = 100
+        private var mLocationRequest: LocationRequest? = null
+        private var mLocationSettingsRequest: LocationSettingsRequest? = null
+        private var mLocationCallback: LocationCallback? = null
+        private var mCurrentLocation: Location? = null
+        private var mRequestingLocationUpdates: Boolean? = null
+        val TAGNUMBER = "TAGNUMBERHERE"
+        val TAG: String = "MainActivityTAG"
+    }
+
 }
