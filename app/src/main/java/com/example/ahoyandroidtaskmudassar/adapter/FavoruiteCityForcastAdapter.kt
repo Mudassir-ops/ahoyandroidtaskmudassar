@@ -9,21 +9,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.ahoyandroidtaskmudassar.MainActivity
 import com.example.ahoyandroidtaskmudassar.databinding.ForcastLayoutBinding
 import com.example.ahoyandroidtaskmudassar.model.Daily
+import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
 import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class WeeklyWeatherForcastAdapter(private val callback: (Int) -> Unit) : ListAdapter<Daily, WeeklyWeatherForcastAdapter.ViewHolder>(DiffCallbak()){
+class FavoruiteCityForcastAdapter(private val callback: (Int) -> Unit) : ListAdapter<FavouritesTable, FavoruiteCityForcastAdapter.ViewHolder>(DiffCallbak()){
 
     class ViewHolder(private val binding: ForcastLayoutBinding, val callback: (Int) -> Unit): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(daily: Daily){
+        fun bind(favouritesTable: FavouritesTable){
             binding.apply {
 
-                tvTime.text=getRIme(daily.dt.toLong())
-                tvTmep.text = "${daily.temp.max} ℉"
-                tvWind.text = "${daily.wind_speed} ℉"
+                tvTime.text=favouritesTable.name
+                tvTmep.text = favouritesTable.temp
+                tvWind.text = favouritesTable.description
 
             }
         }
@@ -70,13 +71,13 @@ class WeeklyWeatherForcastAdapter(private val callback: (Int) -> Unit) : ListAda
         holder.setIsRecyclable(false)
     }
 
-    class  DiffCallbak: DiffUtil.ItemCallback<Daily>(){
-        override fun areItemsTheSame(oldItem: Daily, newItem: Daily): Boolean {
+    class  DiffCallbak: DiffUtil.ItemCallback<FavouritesTable>(){
+        override fun areItemsTheSame(oldItem: FavouritesTable, newItem: FavouritesTable): Boolean {
             return oldItem != newItem
 
         }
 
-        override fun areContentsTheSame(oldItem: Daily, newItem: Daily): Boolean {
+        override fun areContentsTheSame(oldItem: FavouritesTable, newItem: FavouritesTable): Boolean {
             return oldItem != newItem
         }
 

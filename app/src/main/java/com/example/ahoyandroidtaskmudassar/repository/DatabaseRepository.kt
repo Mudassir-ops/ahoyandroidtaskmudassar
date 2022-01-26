@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class UserRepository @Inject constructor (private val favouriteDao: FavouriteDao) {
+class DatabaseRepository @Inject constructor (private val favouriteDao: FavouriteDao) {
     val getfavourites:Flow<List<FavouritesTable>> = favouriteDao.getAllFavouriteCity()
 
     @WorkerThread

@@ -3,21 +3,22 @@ package com.example.ahoyandroidtaskmudassar.viewmodel
 
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.ahoyandroidtaskmudassar.model.Json4Kotlin_Base
 import com.example.ahoyandroidtaskmudassar.model.Json4Kotlin_Base2
+import com.example.ahoyandroidtaskmudassar.model.datamodels.clinnic.FavouritesTable
+import com.example.ahoyandroidtaskmudassar.repository.DatabaseRepository
 import com.example.ahoyandroidtaskmudassar.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel
 @Inject
-constructor(private val repository: WeatherRepository) : ViewModel() {
+constructor(private val repository: WeatherRepository,private val databaseRepository: DatabaseRepository) : ViewModel() {
 
     val latData=MutableLiveData<String>()
     val lngData=MutableLiveData<String>()
@@ -73,6 +74,15 @@ constructor(private val repository: WeatherRepository) : ViewModel() {
         }
     }
 
+
+    val getFavouritesCityWeather:LiveData<List<FavouritesTable>> get() =
+        databaseRepository.getfavourites.flowOn(Dispatchers.Main).asLiveData(context = viewModelScope.coroutineContext)
+
+    fun insert(favouritesTable: FavouritesTable){
+        viewModelScope.launch {
+            databaseRepository.insert(favouritesTable)
+        }
+    }
 }
 
 

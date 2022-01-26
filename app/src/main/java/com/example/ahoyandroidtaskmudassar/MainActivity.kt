@@ -2,11 +2,13 @@ package com.example.ahoyandroidtaskmudassar
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
@@ -17,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.ahoyandroidtaskmudassar.adapter.FavoruiteCityForcastAdapter
 import com.example.ahoyandroidtaskmudassar.model.datasource.local.database.AppDatabase
 import com.example.ahoyandroidtaskmudassar.adapter.WeeklyWeatherForcastAdapter
 import com.example.ahoyandroidtaskmudassar.databinding.ActivityMainBinding
@@ -48,21 +51,19 @@ import kotlin.math.log
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity() {
 
-    var ifSearchCLicked=false
+    var ifSearchCLicked = false
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var mSettingsClient: SettingsClient? = null
 
+    val hourlyWeaterData = ArrayList<Hourly>()
+    val weekllyWeaterData = ArrayList<Daily>()
 
-    var favouriteDao: FavouriteDao =
-        AppDatabase.getDatabase(MyApplication.getInstance().applicationContext)
-            .favouriteDao()
-
-    val hourlyWeaterData=ArrayList<Hourly>()
-    val weekllyWeaterData=ArrayList<Daily>()
     private lateinit var binding: ActivityMainBinding
     private val viewModel: WeatherViewModel by viewModels()
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -73,31 +74,49 @@ class MainActivity : AppCompatActivity(){
         restoreValuesFromBundle(savedInstanceState)
 
 
+        val weeklyWeatherForcastAdapter =
+            WeeklyWeatherForcastAdapter { Log.d(TAG, "onCreate: $it") }
+        val favoruiteCityForcastAdapter =
+            FavoruiteCityForcastAdapter { Log.d(TAG, "onCreate: $it") }
 
         binding.fvBtn.setOnClickListener {
-            //-----insert into db adn disaly in bottom reclerview
-            CoroutineScope(IO).launch {
-                favouriteDao.insertFavouriteCity(FavouritesTable(name=binding.tvCityName.text.toString(),temp=binding.tvCityTemp.text.toString(),feels_like=binding.tvCityFeelBy.text.toString(), description =binding.tvCityDecription.text.toString()))
-            }
+            binding.fvBtn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_favorite_24, applicationContext.theme))
+            viewModel.insert(
+                FavouritesTable(
+                    name = binding.tvCityName.text.toString(),
+                    temp = binding.tvCityTemp.text.toString(),
+                    feels_like = binding.tvCityFeelBy.text.toString(),
+                    description = binding.tvCityDecription.text.toString()
+                )
+            )
         }
 
+        viewModel.getFavouritesCityWeather.observe(this, Observer {
+            favoruiteCityForcastAdapter.submitList(null)
+            favoruiteCityForcastAdapter.submitList(it as ArrayList<FavouritesTable>)
+            favoruiteCityForcastAdapter.notifyDataSetChanged()
 
-        val weeklyWeatherForcastAdapter = WeeklyWeatherForcastAdapter {
-            Log.d(TAG, "onCreate: $it")
-        }
+        })
+
 
         binding.rvWeekly.apply {
             adapter = weeklyWeatherForcastAdapter
             layoutManager = LinearLayoutManager(this@MainActivity).apply {
                 orientation = LinearLayoutManager.HORIZONTAL
-                    }
-                }
+            }
+        }
+        binding.rvFavourtie.apply {
+            adapter = favoruiteCityForcastAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity).apply {
+                orientation = LinearLayoutManager.HORIZONTAL
+            }
+        }
 
 
         viewModel.weatherResponse2.observe(this, Observer {
             Log.d("SSsaS", "onCreate: ${it.timezone}")
             //---x numbers weather forcast
-           // viewModel.getWeatherByOneCall()
+            // viewModel.getWeatherByOneCall()
 
             binding.apply {
 
@@ -129,9 +148,9 @@ class MainActivity : AppCompatActivity(){
         })
 
 
-       binding.btnSearch.setOnClickListener {
-           ifSearchCLicked=true
-           viewModel.cityName.value=binding.etSearchByCity.text.toString().trim()
+        binding.btnSearch.setOnClickListener {
+            ifSearchCLicked = true
+            viewModel.cityName.value = binding.etSearchByCity.text.toString().trim()
             viewModel.getWeatherByCityName()
 
         }
@@ -144,8 +163,8 @@ class MainActivity : AppCompatActivity(){
                 tvCityTemp.text = "${it.main.temp} ℉"
                 tvCityFeelBy.text = "feels like${it.main.feels_like} ℉"
                 tvCityDecription.text = "${it.weather2[0].description}"
-                viewModel.lngData.value=it.coord.lon.toString()
-                viewModel.latData.value=it.coord.lat.toString()
+                viewModel.lngData.value = it.coord.lon.toString()
+                viewModel.latData.value = it.coord.lat.toString()
                 viewModel.getWeatherByOneCall()
 
 
@@ -195,17 +214,14 @@ class MainActivity : AppCompatActivity(){
 
     private fun updateLocationUI() {
         if (mCurrentLocation != null) {
-            viewModel.latData.value= mCurrentLocation!!.latitude.toString()
-            viewModel.lngData.value=mCurrentLocation!!.longitude.toString()
-          //  binding.tvWind.text= "Last updated on: $mLastUpdateTime"
+            viewModel.latData.value = mCurrentLocation!!.latitude.toString()
+            viewModel.lngData.value = mCurrentLocation!!.longitude.toString()
+            //  binding.tvWind.text= "Last updated on: $mLastUpdateTime"
             viewModel.getWeather2()
             viewModel.getWeatherByOneCall()
         }
 
     }
-
-
-
 
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -332,10 +348,10 @@ class MainActivity : AppCompatActivity(){
 
     override fun onResume() {
         super.onResume()
-        if(!ifSearchCLicked){
+        if (!ifSearchCLicked) {
             if (mRequestingLocationUpdates!! && checkPermissions()) {
                 startLocationUpdates()
-            }else{
+            } else {
                 startLocationButtonClick()
                 updateLocationUI()
             }
@@ -352,7 +368,7 @@ class MainActivity : AppCompatActivity(){
         return permissionState == PackageManager.PERMISSION_GRANTED
     }
 
-    companion object{
+    companion object {
         private var mLastUpdateTime: String? = null
         private val UPDATE_INTERVAL_IN_MILLISECONDS: Long = 100
         private val FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS: Long = 50
@@ -362,31 +378,31 @@ class MainActivity : AppCompatActivity(){
         private var mLocationCallback: LocationCallback? = null
         private var mCurrentLocation: Location? = null
         private var mRequestingLocationUpdates: Boolean? = null
-        val TAG: String ="MainActivityTAG"
+        val TAG: String = "MainActivityTAG"
     }
 
-fun getRIme(timestmap:Long){
-    val unixSeconds: Long = 1372339860
-    val date = Date(unixSeconds * 1000L) // *1000 is to convert seconds to milliseconds
-    val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z") // the format of your date
-    sdf.setTimeZone(TimeZone.getTimeZone("GMT-4")) // give a timezone reference for formating (see comment at the bottom
-    val formattedDate: String = sdf.format(date)
-    Log.d(TAG, "getRIme: $formattedDate")
+    fun getRIme(timestmap: Long) {
+        val unixSeconds: Long = 1372339860
+        val date = Date(unixSeconds * 1000L) // *1000 is to convert seconds to milliseconds
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z") // the format of your date
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT-4")) // give a timezone reference for formating (see comment at the bottom
+        val formattedDate: String = sdf.format(date)
+        Log.d(TAG, "getRIme: $formattedDate")
 
-    val cal = Calendar.getInstance()
-    cal.time = date
-    val year = cal[Calendar.YEAR]
-    val month = cal[Calendar.MONTH] //here is what you need
+        val cal = Calendar.getInstance()
+        cal.time = date
+        val year = cal[Calendar.YEAR]
+        val month = cal[Calendar.MONTH] //here is what you need
 
-    val day = cal[Calendar.DAY_OF_MONTH]
-    val day1 = cal[Calendar.DAY_OF_WEEK]
+        val day = cal[Calendar.DAY_OF_MONTH]
+        val day1 = cal[Calendar.DAY_OF_WEEK]
 
-    Log.d(TAG, "getRIme: $day")
-    Log.d(TAG, "getRIme: $day1")
-    Log.d(TAG, "getRIme: ${getDayName(day1,  Locale("en", "DK") )}")
+        Log.d(TAG, "getRIme: $day")
+        Log.d(TAG, "getRIme: $day1")
+        Log.d(TAG, "getRIme: ${getDayName(day1, Locale("en", "DK"))}")
 
 
-}
+    }
 
     fun getDayName(day: Int, locale: Locale?): String? {
         val symbols = DateFormatSymbols(locale)
